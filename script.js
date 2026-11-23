@@ -621,8 +621,10 @@ function flashOptionsHtml() {
   }).join('');
 }
 
-// 先示唆の表示。画像があるモードは画像、まだのモードは文字の枠
-const SAKI_IMAGES = { '25': 'img/saki-sakiga.png' };
+// 先示唆の表示：モードごとの画像（ユーザー提供・幅480pxのJPGに縮小）。画像がなければ文字の枠
+const SAKI_IMAGES = { '45': 'img/saki-atsuga.jpg', '25': 'img/saki-sakiga.jpg', '100': 'img/saki-sakiiwai.jpg' };
+// 先示唆が出た瞬間に表示できるよう、最初に読み込んでおく
+Object.values(SAKI_IMAGES).forEach((src) => { new Image().src = src; });
 function sakiHtml() {
   const src = SAKI_IMAGES[game.flash];
   if (src) return `<img class="saki-img" src="${src}" alt="先示唆">`;
