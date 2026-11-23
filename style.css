@@ -702,3 +702,6 @@ body {
 
 /* ボーナスの見出し（ラッシュ突入・チャージなど） */
 .bonus-label { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 2px; }
+
+/* 先示唆の画像 */
+.saki-img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }

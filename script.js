@@ -621,6 +621,14 @@ function flashOptionsHtml() {
   }).join('');
 }
 
+// 先示唆の表示。画像があるモードは画像、まだのモードは文字の枠
+const SAKI_IMAGES = { '25': 'img/saki-sakiga.png' };
+function sakiHtml() {
+  const src = SAKI_IMAGES[game.flash];
+  if (src) return `<img class="saki-img" src="${src}" alt="先示唆">`;
+  return `<div class="flash-box">先示唆！</div>`;
+}
+
 function flashLabel() {
   return `${FLASH_MODE_NAMES[game.flash]}（当選率${game.flash}%）`;
 }
@@ -812,7 +820,7 @@ function buildScreen(state) {
     case 'flash':
       return `<div class="screen">
         <p class="result-sub">${p.interval}回転</p>
-        <div class="flash-box">先示唆！</div>
+        ${sakiHtml()}
         <p class="shinraido">${flashLabel()}</p>
         <button class="btn-action" onclick="handleFlashJudge()">▶ 判定</button>
       </div>`;
