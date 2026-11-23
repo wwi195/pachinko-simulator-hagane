@@ -617,7 +617,7 @@ function tenThousandYenSpins() {
 
 function spinRateOptionsHtml() {
   return SPIN_RATE_OPTIONS.map((rate) => {
-    const note = rate === DEFAULT_SPIN_RATE ? '（初期値）' : '';
+    const note = rate === DEFAULT_SPIN_RATE ? '（ボーダー）' : '';
     return `<option value="${rate}" ${rate === game.spinRate ? 'selected' : ''}>${rate}回転${note}</option>`;
   }).join('');
 }
@@ -755,8 +755,8 @@ function buildScreen(state) {
         </div>
         <div class="auto-spin-btns">
           <div class="auto-spin-wrap">
-            <button class="btn-auto" onclick="autoSpin(${tenThousandYenSpins()})">1万円分回す</button>
-            <p class="spin-cost-hint">約${tenThousandYenSpins()}回転分</p>
+            <button class="btn-auto" onclick="autoSpin(${Math.round(tenThousandYenSpins())})">1万円分回す</button>
+            <p class="spin-cost-hint">約${Math.round(tenThousandYenSpins())}回転分</p>
           </div>
         </div>
         <div style="display:flex; gap:8px;">
