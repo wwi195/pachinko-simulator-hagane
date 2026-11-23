@@ -685,3 +685,7 @@ body {
 
 /* 出現率の告知（ハマり・コマチャレンジ連続） */
 .rare-note { margin: 4px 0 0; text-align: center; font-size: 12px; font-weight: bold; line-height: 1.6; color: #c9a227; }
+
+/* ボーナスの振り分け表示 */
+.share-note { font-size: 13px; color: var(--c-ruri); background: #f1f3f8; border: 1px solid #c8cfdc; border-radius: 8px; padding: 4px 12px; text-align: center; line-height: 1.5; }
+.share-note small { font-size: 11px; color: #666; }

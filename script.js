@@ -723,6 +723,25 @@ function czIdleScreen() {
   </div>`;
 }
 
+// ボーナスの振り分け（そのボーナスが選ばれる割合）を表示する
+function shareNote(text) {
+  return `<p class="share-note">振り分け ${text}</p>`;
+}
+// 通常時の図柄揃い：1000 or 1500個＋ラッシュ 50%（半々）、1000個＋CZ 50%
+function battleShareHtml(b) {
+  if (!b.win) return shareNote('1000個＋CZ 50%');
+  return shareNote(`${b.balls}個＋ラッシュ 25%<br><small>（1000 or 1500個＋ラッシュ 50%）</small>`);
+}
+// ラッシュ：6000 or 7500個 45%（半々）、1500個 55%
+function rushShareHtml(b) {
+  if (!b.big) return shareNote('1500個 55%');
+  return shareNote(`${b.balls.toLocaleString()}個 22.5%<br><small>（6000 or 7500個 45%）</small>`);
+}
+function czShareHtml(b) {
+  return shareNote(`${b.balls.toLocaleString()}個＋${b.to === 'rush' ? 'ラッシュ' : 'CZ'} ${b.pct}%`);
+}
+const CHARGE_SHARE_HTML = shareNote(`チャージ 1/1749.97<br><small>（当たり全体の約${Math.round(P_CHARGE / P_TOTAL_HIT * 100)}%）</small>`);
+
 // 10R=1500個。6000以上は「10R×◯」も添える
 function roundsText(nominal) {
   return nominal >= 3000 ? `<p class="judge-label">10R×${nominal / 1500}</p>` : '';
@@ -809,6 +828,7 @@ function buildScreen(state) {
       return `<div class="screen">
         <p class="judge-win">勝利！</p>
         ${bonusBox('ラッシュ突入', p.battle.balls, 'premium')}
+        ${battleShareHtml(p.battle)}
         <button class="btn-action" onclick="enterRush()">▶ ラッシュへ</button>
       </div>`;
 
@@ -816,6 +836,7 @@ function buildScreen(state) {
       return `<div class="screen">
         <p class="result-main lose small">敗北…</p>
         ${bonusBox('大当たり', BATTLE_LOSE_BALLS)}
+        ${battleShareHtml(p.battle)}
         <p class="result-sub">CZ（${CZ_SPINS}回転）へ</p>
         <button class="btn-sub" onclick="enterCz()" style="margin-top:8px;">▶ CZへ</button>
       </div>`;
@@ -824,6 +845,7 @@ function buildScreen(state) {
       return `<div class="screen">
         <p class="result-sub">${p.interval}回転で当たり</p>
         ${bonusBox('チャージ', CHARGE_BALLS)}
+        ${CHARGE_SHARE_HTML}
         ${hitIntervalProbHtml(p.interval)}
         ${noRushStreakNoticeHtml()}
         <button class="btn-sub" onclick="handleSessionEnd()" style="margin-top:8px;">▶ 通常へ戻る</button>
@@ -833,6 +855,7 @@ function buildScreen(state) {
       return `<div class="screen">
         <p class="result-sub">${p.interval}回転で大当たり</p>
         ${bonusBox('図柄揃い', p.battle.balls, 'premium', '<p class="judge-label">ラッシュ確定！</p>')}
+        ${battleShareHtml(p.battle)}
         ${hitIntervalProbHtml(p.interval)}
         <button class="btn-action" onclick="enterRush()">▶ ラッシュへ</button>
       </div>`;
@@ -844,6 +867,7 @@ function buildScreen(state) {
           <p class="bonus-main normal-hit">${p.type === 'charge' ? 'チャージ' : '通常当たり'}</p>
           <p class="bonus-sub">${p.nominal.toLocaleString()}個（＋${toActualBalls(p.nominal).toLocaleString()}球）</p>
         </div>
+        ${p.type === 'charge' ? CHARGE_SHARE_HTML : battleShareHtml(p.battle)}
         ${hitIntervalProbHtml(p.interval)}
         ${p.type === 'charge'
           ? `${noRushStreakNoticeHtml()}<button class="btn-sub" onclick="handleSessionEnd()" style="margin-top:8px;">▶ 通常へ戻る</button>`
@@ -859,6 +883,7 @@ function buildScreen(state) {
         <p class="result-sub">ST${p.spins}回転目で当選</p>
         <p class="chain-label">${game.session.hits}連チャン</p>
         ${bonusBox(b.big ? 'BIG BONUS' : 'BONUS', b.balls, b.big ? 'premium' : 'standard', roundsText(b.balls))}
+        ${rushShareHtml(b)}
         <button class="btn-action" onclick="enterRush()">▶ 次へ</button>
       </div>`;
     }
@@ -882,6 +907,7 @@ function buildScreen(state) {
         <p class="judge-win">CZ当選！</p>
         <p class="result-sub">${p.spins}回転目 ／ ${game.session.hits}連チャン</p>
         ${bonusBox(b.balls >= 9000 ? 'BIG BONUS' : 'BONUS', b.balls, b.balls >= 9000 || toRush ? 'premium' : 'standard', sub)}
+        ${czShareHtml(b)}
         <button class="btn-action" onclick="handleCzHitContinue()">▶ ${toRush ? 'ラッシュへ' : 'CZへ'}</button>
       </div>`;
     }

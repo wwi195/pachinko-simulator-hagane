@@ -112,10 +112,10 @@ function rollCzBonus() {
   let acc = 0;
   for (const row of CZ_HIT_TABLE) {
     acc += row.pct;
-    if (r < acc) return { balls: row.balls, to: row.to };
+    if (r < acc) return { balls: row.balls, to: row.to, pct: row.pct };
   }
   const last = CZ_HIT_TABLE[CZ_HIT_TABLE.length - 1];
-  return { balls: last.balls, to: last.to };
+  return { balls: last.balls, to: last.to, pct: last.pct };
 }
 
 // CZ40回のうちに当たる確率（約18.3%）

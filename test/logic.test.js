@@ -66,8 +66,8 @@ test('CZ：40回で約18.3%、振り分けの合計は100%', () => {
   assert.ok(close(logic.czHitProbability(), 0.183, 0.002));
   const sum = logic.CZ_HIT_TABLE.reduce((s, r) => s + r.pct, 0);
   assert.ok(close(sum, 100, 1e-9));
-  assert.deepEqual(withMockRandom([0.10], () => logic.rollCzBonus()), { balls: 9000, to: 'rush' });
-  assert.deepEqual(withMockRandom([0.99], () => logic.rollCzBonus()), { balls: 300, to: 'cz' });
+  assert.deepEqual(withMockRandom([0.10], () => logic.rollCzBonus()), { balls: 9000, to: 'rush', pct: 14.2 });
+  assert.deepEqual(withMockRandom([0.99], () => logic.rollCzBonus()), { balls: 300, to: 'cz', pct: 11.4 });
 });
 
 test('初当たりのラッシュ突入率は 約41%（チャージはCZに入らない）', () => {
