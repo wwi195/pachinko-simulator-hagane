@@ -38,7 +38,7 @@ test('当たりの種類：約80%が図柄揃い、残りがチャージ', () =>
 
 test('先示唆の当選率：当たり ÷ (当たり＋外れの先示唆) が選んだモードの当選率になる', () => {
   for (const opt of ['45', '25']) {
-    const p = logic.P_NORMAL_HIT;
+    const p = logic.P_ZUGARA; // チャージは先示唆なしなので、先示唆からの当たりは図柄揃いだけ
     const conf = p / (p + logic.falseFlashProbability(opt));
     assert.ok(close(conf, Number(opt) / 100, 1e-12), opt);
   }

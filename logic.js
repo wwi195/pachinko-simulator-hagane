@@ -28,7 +28,7 @@ const P_CHARGE = 1 / 1749.97;
 const P_ZUGARA = P_TOTAL_HIT - P_CHARGE; // 約1/437.48
 const P_NORMAL_HIT = P_TOTAL_HIT;
 
-// 先示唆：当たりは必ず先示唆から来る。モードで当選率（信頼度）を選べる
+// 先示唆：図柄揃いは必ず先示唆から来る（チャージは先示唆なしでそのまま出る）。モードで当選率（信頼度）を選べる
 // アツ牙モード 45%（初期値）／先牙モード 25%／先祝モード 100%（先示唆が出れば必ず当たり）
 const FLASH_OPTIONS = ['45', '25', '100'];
 const DEFAULT_FLASH = '45';
@@ -38,10 +38,10 @@ function flashConfidence(option) {
   return Number(option);
 }
 
-// 外れなのに先示唆が出る確率
+// 外れなのに先示唆が出る確率（先示唆からの当たり＝図柄揃い ÷ 先示唆 が当選率になるように）
 function falseFlashProbability(option) {
   const c = flashConfidence(option);
-  return P_NORMAL_HIT * ((100 - c) / c);
+  return P_ZUGARA * ((100 - c) / c);
 }
 
 // 通常時1回転：'hit' / 'false_flash' / 'miss'
