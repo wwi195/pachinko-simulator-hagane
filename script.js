@@ -341,22 +341,9 @@ function handleCzSpin() {
   runCzSpin();
 }
 
-function handleCzSpin10() {
-  for (let i = 0; i < 10; i++) {
-    if (runCzSpin({ silent: true })) return;
-  }
-  setState('cz_idle');
-}
-
-// 当たりか、残り10回まで一気に回す
+// 当たりか、40回転を全部消化するまで一気に回す
 function handleCzSkip() {
-  for (;;) {
-    if (runCzSpin({ silent: true })) return;
-    if (game.czRemaining <= 10) {
-      setState('cz_idle');
-      return;
-    }
-  }
+  while (!runCzSpin({ silent: true })) { /* 外れは飛ばす */ }
 }
 
 function handleCzHitContinue() {
@@ -697,8 +684,7 @@ function czIdleScreen() {
     <p class="rush-sub">残り <span>${game.czRemaining}</span> 回</p>
     <div class="rush-spin-btns">
       <button class="btn-rush-spin" onclick="handleCzSpin()">1回転</button>
-      <button class="btn-rush-spin" onclick="handleCzSpin10()">10回転</button>
-      <button class="btn-rush-spin skip" ${game.czRemaining <= 10 ? 'disabled' : 'onclick="handleCzSkip()"'}>スキップ</button>
+      <button class="btn-rush-spin skip" onclick="handleCzSkip()">スキップ</button>
     </div>
     <p class="prob-hint">大当たり確率 ${P_CZ_DISPLAY}<br>電サポなし（玉を使います）</p>
     <button class="btn-taiten" onclick="handleTaiten()">退店する</button>
