@@ -723,8 +723,7 @@ function rushShareHtml(b) {
   return shareNote(`${b.balls.toLocaleString()}個 22.5%<br><small>（6000 or 7500個 45%）</small>`);
 }
 function czShareHtml(b) {
-  const name = b.balls === CHARGE_BALLS ? 'チャージ' : `${b.balls.toLocaleString()}個`;
-  return shareNote(`${name}＋${b.to === 'rush' ? 'ラッシュ' : 'CZ'} ${b.pct}%`);
+  return shareNote(`${b.balls.toLocaleString()}個＋${b.to === 'rush' ? 'ラッシュ' : 'CZ'} ${b.pct}%`);
 }
 const CHARGE_SHARE_HTML = shareNote(`チャージ 1/1749.97<br><small>（当たり全体の約${Math.round(P_CHARGE / P_TOTAL_HIT * 100)}%）</small>`);
 
@@ -742,7 +741,7 @@ const SHARE_TABLES = {
   },
   cz: {
     title: 'CZ中の当たり',
-    rows: CZ_HIT_TABLE.map((r) => [`${r.balls === CHARGE_BALLS ? 'チャージ' : `${r.balls.toLocaleString()}個`}＋${r.to === 'rush' ? 'ラッシュ' : 'CZ'}`, `${r.pct}%`]),
+    rows: CZ_HIT_TABLE.map((r) => [`${r.balls.toLocaleString()}個＋${r.to === 'rush' ? 'ラッシュ' : 'CZ'}`, `${r.pct}%`]),
     note: '',
   },
 };
@@ -772,11 +771,12 @@ function roundsText(nominal) {
   return nominal >= 3000 ? `<p class="judge-label">10R×${nominal / 1500}</p>` : '';
 }
 
-// 「1500ボーナス！」と大きく出し、下に小さく（実質獲得 1,400）。300個（2R）は「チャージ！」。label はその上に小さく出す見出し（任意）
-function bonusBox(label, nominal, cls = 'standard', sub = '') {
+// 「1500ボーナス！」と大きく出し、下に小さく（実質獲得 1,400）。通常時の300個（2R）は「チャージ！」（CZ中は charge=false で「300ボーナス！」）。
+// label はその上に小さく出す見出し（任意）
+function bonusBox(label, nominal, cls = 'standard', sub = '', charge = true) {
   return `<div class="vibun-box rush-box">
     ${label ? `<p class="bonus-label">${label}</p>` : ''}
-    <p class="bonus-main ${cls}">${nominal === CHARGE_BALLS ? 'チャージ！' : `${nominal}ボーナス！`}</p>
+    <p class="bonus-main ${cls}">${charge && nominal === CHARGE_BALLS ? 'チャージ！' : `${nominal}ボーナス！`}</p>
     <p class="bonus-sub">（実質獲得 ${toActualBalls(nominal).toLocaleString()}）</p>
     ${sub}
   </div>`;
@@ -912,7 +912,7 @@ function buildScreen(state) {
       return `<div class="screen">
         <p class="judge-win">CZ当選！</p>
         <p class="result-sub">${p.spins}回転目 ／ ${game.session.hits}連チャン</p>
-        ${bonusBox('', b.balls, b.balls >= 9000 || toRush ? 'premium' : 'standard', sub)}
+        ${bonusBox('', b.balls, b.balls >= 9000 || toRush ? 'premium' : 'standard', sub, false)}
         ${czShareHtml(b)}
         <button class="btn-action" onclick="handleCzHitContinue()">▶ ${toRush ? 'ラッシュへ' : 'CZへ'}</button>
       </div>`;
