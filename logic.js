@@ -6,7 +6,7 @@
 // ---- 遊技条件 ----
 // 等価（4円/玉）固定。1000円=250玉。
 const YEN_PER_BALL = 4;
-const SPIN_RATE_OPTIONS = [13, 15.4, 17, 19, 20];
+const SPIN_RATE_OPTIONS = [10, 13, 15.4, 17, 20];
 const DEFAULT_SPIN_RATE = 15.4; // ボーダー（docs/spec.md）
 
 function calcSpinCost(spinRate) {
