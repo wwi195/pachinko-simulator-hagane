@@ -28,15 +28,17 @@ const P_CHARGE = 1 / 1749.97;
 const P_ZUGARA = P_TOTAL_HIT - P_CHARGE; // 約1/437.48
 const P_NORMAL_HIT = P_TOTAL_HIT;
 
-// 入賞時フラッシュ：当たりは必ずフラッシュから。信頼度を選べる
-// EX＝フラッシュならラッシュ確定（外れフラッシュなし）。ラッシュにならない当たりはフラッシュなしで来る（script.js側で分岐）
-const FLASH_OPTIONS = ['25', '40', 'EX'];
-const DEFAULT_FLASH = '40';
+// 先示唆：当たりは必ず先示唆から来る。モードで当選率（信頼度）を選べる
+// アツ鋼モード 45%（初期値）／先鋼モード 25%／先祝モード 100%（先示唆が出れば必ず当たり）
+const FLASH_OPTIONS = ['45', '25', '100'];
+const DEFAULT_FLASH = '45';
+const FLASH_MODE_NAMES = { '45': 'アツ鋼モード', '25': '先鋼モード', '100': '先祝モード' };
 
 function flashConfidence(option) {
-  return option === 'EX' ? 100 : Number(option);
+  return Number(option);
 }
 
+// 外れなのに先示唆が出る確率
 function falseFlashProbability(option) {
   const c = flashConfidence(option);
   return P_NORMAL_HIT * ((100 - c) / c);
@@ -162,6 +164,7 @@ if (typeof module !== 'undefined' && module.exports) {
     P_NORMAL_HIT,
     FLASH_OPTIONS,
     DEFAULT_FLASH,
+    FLASH_MODE_NAMES,
     flashConfidence,
     falseFlashProbability,
     spinNormal,

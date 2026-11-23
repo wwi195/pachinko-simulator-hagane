@@ -1,7 +1,7 @@
 'use strict';
 
 // 鋼の1/437(13) シミュレーター（画面と状態遷移）。確率は logic.js。
-// 流れ：通常時 →（入賞時フラッシュ）→ 大当たり
+// 流れ：通常時 →（先示唆）→ 大当たり
 //   ├ 図柄揃い → バトル → 勝利：ラッシュ（1500 or 1000個）／ 敗北：1000個 → CZ
 //   └ チャージ（300個）→ そのまま通常へ（CZには入らない）
 // ラッシュ：ST130回。当たれば継続（45%で6000 or 7500個、55%で1500個）、130回スルーでCZへ
@@ -154,25 +154,14 @@ function runNormalSpin() {
   const interval = game.normalSpins - game.lastHitSpins;
   if (outcome === 'false_flash') {
     game.pending = { isHit: false, interval };
-    addLog(`${interval}回転で入賞時フラッシュ！`);
+    addLog(`${interval}回転で先示唆！`);
     setState('flash');
     return true;
   }
   const type = rollNormalHitType();
   const battle = type === 'zugara' ? rollBattle() : null;
   game.pending = { isHit: true, interval, type, battle };
-  // EXのときは、フラッシュ＝ラッシュ確定。ラッシュにならない当たりはフラッシュなしで出す
-  if (game.flash === 'EX' && !(battle && battle.win)) {
-    startSession(interval);
-    const nominal = type === 'charge' ? CHARGE_BALLS : BATTLE_LOSE_BALLS;
-    const actual = award(nominal);
-    game.pending.nominal = nominal;
-    if (type === 'charge') finishSingle();
-    addLog(`${interval}回転で${type === 'charge' ? 'チャージ' : '大当たり'} ＋${actual}球`, 'win');
-    setState('ex_normal');
-    return true;
-  }
-  addLog(`${interval}回転で入賞時フラッシュ！`);
+  addLog(`${interval}回転で先示唆！`);
   setState('flash');
   return true;
 }
@@ -217,13 +206,6 @@ function handleFlashJudge() {
     finishSingle();
     addLog(`${p.interval}回転でチャージ ＋${actual}球`, 'win');
     setState('charge_hit');
-    return;
-  }
-  if (game.flash === 'EX') {
-    // EXのフラッシュはラッシュになる当たりだけ。バトルなしで確定
-    const actual = award(p.battle.balls);
-    addLog(`${p.interval}回転で大当たり！ ＋${actual}球 ラッシュ確定`, 'win');
-    setState('ex_rush');
     return;
   }
   addLog(`${p.interval}回転で大当たり！ 図柄揃い`, 'win');
@@ -642,13 +624,13 @@ function spinRateOptionsHtml() {
 
 function flashOptionsHtml() {
   return FLASH_OPTIONS.map((opt) => {
-    const label = opt === 'EX' ? 'EX（ラッシュ確定）' : `信頼度${opt}%`;
+    const label = `${FLASH_MODE_NAMES[opt]}（当選率${opt}%）`;
     return `<option value="${opt}" ${opt === game.flash ? 'selected' : ''}>${label}</option>`;
   }).join('');
 }
 
 function flashLabel() {
-  return game.flash === 'EX' ? 'EX（ラッシュ確定）' : `${game.flash}%`;
+  return `${FLASH_MODE_NAMES[game.flash]}（当選率${game.flash}%）`;
 }
 
 // ---- 出現率の表示 ----
@@ -764,7 +746,7 @@ function buildScreen(state) {
         <button class="btn-start" onclick="handleStart()">START</button>
         <p class="prob-hint">${P_NORMAL_HIT_DISPLAY}</p>
         <div class="spin-rate-block">
-          <span class="spin-rate-label">入賞時フラッシュ</span>
+          <span class="spin-rate-label">先示唆</span>
           <select class="spin-rate-select" onchange="handleFlashChange(this.value)">${flashOptionsHtml()}</select>
         </div>
         <div class="spin-rate-block">
@@ -795,8 +777,8 @@ function buildScreen(state) {
     case 'flash':
       return `<div class="screen">
         <p class="result-sub">${p.interval}回転</p>
-        <div class="flash-box">入賞時フラッシュ！</div>
-        <p class="shinraido">信頼度 ${flashLabel()}</p>
+        <div class="flash-box">先示唆！</div>
+        <p class="shinraido">${flashLabel()}</p>
         <button class="btn-action" onclick="handleFlashJudge()">▶ 判定</button>
       </div>`;
 
@@ -849,29 +831,6 @@ function buildScreen(state) {
         ${hitIntervalProbHtml(p.interval)}
         ${noRushStreakNoticeHtml()}
         <button class="btn-sub" onclick="handleSessionEnd()" style="margin-top:8px;">▶ 通常へ戻る</button>
-      </div>`;
-
-    case 'ex_rush':
-      return `<div class="screen">
-        <p class="result-sub">${p.interval}回転で大当たり</p>
-        ${bonusBox('図柄揃い', p.battle.balls, 'premium', '<p class="judge-label">ラッシュ確定！</p>')}
-        ${battleShareHtml(p.battle)}
-        ${hitIntervalProbHtml(p.interval)}
-        <button class="btn-action" onclick="enterRush()">▶ ラッシュへ</button>
-      </div>`;
-
-    case 'ex_normal':
-      return `<div class="screen">
-        <p class="result-sub">${p.interval}回転で当たり</p>
-        <div class="vibun-box">
-          <p class="bonus-main normal-hit">${p.type === 'charge' ? 'チャージ' : '通常当たり'}</p>
-          <p class="bonus-sub">${p.nominal.toLocaleString()}個（＋${toActualBalls(p.nominal).toLocaleString()}球）</p>
-        </div>
-        ${p.type === 'charge' ? CHARGE_SHARE_HTML : battleShareHtml(p.battle)}
-        ${hitIntervalProbHtml(p.interval)}
-        ${p.type === 'charge'
-          ? `${noRushStreakNoticeHtml()}<button class="btn-sub" onclick="handleSessionEnd()" style="margin-top:8px;">▶ 通常へ戻る</button>`
-          : `<p class="result-sub">CZ（${CZ_SPINS}回転）へ</p><button class="btn-sub" onclick="enterCz()" style="margin-top:8px;">▶ CZへ</button>`}
       </div>`;
 
     case 'rush_idle':

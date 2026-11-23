@@ -36,13 +36,14 @@ test('当たりの種類：約80%が図柄揃い、残りがチャージ', () =>
   assert.equal(withMockRandom([0.81], () => logic.rollNormalHitType()), 'charge');
 });
 
-test('フラッシュ信頼度：当たり ÷ (当たり＋偽フラッシュ) が選んだ信頼度になる', () => {
-  for (const opt of ['25', '40']) {
+test('先示唆の当選率：当たり ÷ (当たり＋外れの先示唆) が選んだモードの当選率になる', () => {
+  for (const opt of ['45', '25']) {
     const p = logic.P_NORMAL_HIT;
     const conf = p / (p + logic.falseFlashProbability(opt));
     assert.ok(close(conf, Number(opt) / 100, 1e-12), opt);
   }
-  assert.equal(logic.falseFlashProbability('EX'), 0);
+  assert.equal(logic.falseFlashProbability('100'), 0);
+  assert.deepEqual(logic.FLASH_OPTIONS, ['45', '25', '100']);
 });
 
 test('バトル：勝ちは1500か1000でラッシュ、負けは1000', () => {
