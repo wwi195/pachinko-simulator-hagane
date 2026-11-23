@@ -29,10 +29,10 @@ const P_ZUGARA = P_TOTAL_HIT - P_CHARGE; // 約1/437.48
 const P_NORMAL_HIT = P_TOTAL_HIT;
 
 // 先示唆：当たりは必ず先示唆から来る。モードで当選率（信頼度）を選べる
-// アツ鋼モード 45%（初期値）／先鋼モード 25%／先祝モード 100%（先示唆が出れば必ず当たり）
+// アツ牙モード 45%（初期値）／先牙モード 25%／先祝モード 100%（先示唆が出れば必ず当たり）
 const FLASH_OPTIONS = ['45', '25', '100'];
 const DEFAULT_FLASH = '45';
-const FLASH_MODE_NAMES = { '45': 'アツ鋼モード', '25': '先鋼モード', '100': '先祝モード' };
+const FLASH_MODE_NAMES = { '45': 'アツ牙モード', '25': '先牙モード', '100': '先祝モード' };
 
 function flashConfidence(option) {
   return Number(option);
