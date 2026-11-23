@@ -30,6 +30,7 @@ const game = {
   pending: {},
   eigyoAlertShown: false,
   detailsExpanded: false,
+  shareOpen: false, // 「当たったときの振り分け」タブを開いているか（開閉は覚えておく）
   lastRankResult: null,
   hitHistory: [], // [{games, chain}]（新しい順。chain=null は結果待ち、0はラッシュなし）
   slump: [{ x: 0, y: 0 }],
@@ -418,6 +419,7 @@ function resetGame() {
     pending: {},
     eigyoAlertShown: false,
     detailsExpanded: false,
+    shareOpen: false,
     lastRankResult: null,
     hitHistory: [],
     slump: [{ x: 0, y: 0 }],
@@ -672,6 +674,7 @@ function rushIdleScreen() {
       <button class="btn-rush-spin skip" ${game.stRemaining <= 10 ? 'disabled' : 'onclick="handleRushSkip()"'}>スキップ</button>
     </div>
     <p class="prob-hint">${P_RUSH_DISPLAY}</p>
+    ${shareTabHtml('rush')}
     <button class="btn-taiten" onclick="handleTaiten()">退店する</button>
   </div>`;
 }
@@ -687,6 +690,7 @@ function czIdleScreen() {
       <button class="btn-rush-spin skip" onclick="handleCzSkip()">スキップ</button>
     </div>
     <p class="prob-hint">大当たり確率 ${P_CZ_DISPLAY}<br>電サポなし（玉を使います）</p>
+    ${shareTabHtml('cz')}
     <button class="btn-taiten" onclick="handleTaiten()">退店する</button>
   </div>`;
 }
@@ -709,6 +713,45 @@ function czShareHtml(b) {
   return shareNote(`${b.balls.toLocaleString()}個＋${b.to === 'rush' ? 'ラッシュ' : 'CZ'} ${b.pct}%`);
 }
 const CHARGE_SHARE_HTML = shareNote(`チャージ 1/1749.97<br><small>（当たり全体の約${Math.round(P_CHARGE / P_TOTAL_HIT * 100)}%）</small>`);
+
+// ---- 「当たったときの振り分け」タブ（タッチで開閉。普段は閉じておく） ----
+const SHARE_TABLES = {
+  battle: {
+    title: 'バトルの結果',
+    rows: [['1500個＋ラッシュ', '25%'], ['1000個＋ラッシュ', '25%'], ['1000個＋CZ', '50%']],
+    note: '1500 or 1000個＋ラッシュ 50%（半々）',
+  },
+  rush: {
+    title: 'ラッシュ中の当たり',
+    rows: [['7500個（10R×5）', '22.5%'], ['6000個（10R×4）', '22.5%'], ['1500個', '55%']],
+    note: '6000 or 7500個 45%（半々）。どれもラッシュ継続',
+  },
+  cz: {
+    title: 'CZ中の当たり',
+    rows: CZ_HIT_TABLE.map((r) => [`${r.balls.toLocaleString()}個＋${r.to === 'rush' ? 'ラッシュ' : 'CZ'}`, `${r.pct}%`]),
+    note: '',
+  },
+};
+
+function handleToggleShare() {
+  game.shareOpen = !game.shareOpen;
+  render();
+}
+
+function shareTabHtml(key) {
+  const t = SHARE_TABLES[key];
+  const body = game.shareOpen
+    ? `<div class="share-tab-body">
+        <p class="share-tab-title">${t.title}</p>
+        ${t.rows.map(([k, v]) => `<div class="share-tab-row"><span>${k}</span><span>${v}</span></div>`).join('')}
+        ${t.note ? `<p class="share-tab-note">${t.note}</p>` : ''}
+      </div>`
+    : '';
+  return `<div class="share-tab">
+    <button class="share-tab-btn" type="button" onclick="handleToggleShare()">${game.shareOpen ? '▲' : '▼'} 当たったときの振り分け</button>
+    ${body}
+  </div>`;
+}
 
 // 10R=1500個。6000以上は「10R×◯」も添える
 function roundsText(nominal) {
@@ -783,6 +826,7 @@ function buildScreen(state) {
         </div>
         ${hitIntervalProbHtml(p.interval)}
         <button class="btn-action" onclick="handleBattle()">▶ バトルへ</button>
+        ${shareTabHtml('battle')}
       </div>`;
 
     case 'battle':
@@ -790,6 +834,7 @@ function buildScreen(state) {
         <p class="gasha-title">バトル</p>
         <p class="prob-hint">勝率 50%<br>勝てばラッシュ ／ 負ければ1000個＋CZ</p>
         <button class="gasha-button" onclick="handleBattlePush()">PUSH</button>
+        ${shareTabHtml('battle')}
       </div>`;
 
     case 'battle_win':

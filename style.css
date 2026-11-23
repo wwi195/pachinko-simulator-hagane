@@ -689,3 +689,13 @@ body {
 /* ボーナスの振り分け表示 */
 .share-note { font-size: 13px; color: var(--c-ruri); background: #f1f3f8; border: 1px solid #c8cfdc; border-radius: 8px; padding: 4px 12px; text-align: center; line-height: 1.5; }
 .share-note small { font-size: 11px; color: #666; }
+
+/* 当たったときの振り分けタブ */
+.share-tab { width: 100%; max-width: 320px; }
+.share-tab-btn { width: 100%; padding: 8px 12px; font-size: 13px; font-weight: bold; color: var(--c-ruri); background: #f1f3f8; border: 1px solid #c8cfdc; border-radius: 8px; cursor: pointer; }
+.share-tab-body { margin-top: 6px; padding: 8px 12px; border: 1px solid #c8cfdc; border-radius: 8px; background: #fff; }
+.share-tab-title { font-size: 12px; font-weight: bold; color: #666; margin-bottom: 4px; }
+.share-tab-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; border-bottom: 1px dashed #e2e6ee; }
+.share-tab-row:last-of-type { border-bottom: 0; }
+.share-tab-row span:last-child { font-weight: bold; color: var(--c-ruri); }
+.share-tab-note { font-size: 11px; color: #888; margin-top: 4px; }
