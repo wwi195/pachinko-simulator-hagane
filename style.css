@@ -700,8 +700,20 @@ body {
 .share-tab-row span:last-child { font-weight: bold; color: var(--c-ruri); }
 .share-tab-note { font-size: 11px; color: #888; margin-top: 4px; }
 
-/* ボーナスの見出し（ラッシュ突入・チャージなど） */
+/* ボーナスの見出し（RUSH突入・チャージなど） */
 .bonus-label { font-size: 13px; font-weight: bold; color: #666; margin-bottom: 2px; }
 
 /* 先示唆の画像 */
 .saki-img { display: block; width: 50%; max-width: 160px; height: auto; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+
+/* RUSH中の「RUSH」表示・6000個以上のボーナスの数字：レインボー */
+.rush-rainbow-label,
+.rainbow-num {
+  text-shadow: none;
+  background: linear-gradient(90deg, #ff3b3b, #ff9d3b, #ffe93b, #3bff6a, #3bcfff, #6a3bff, #ff3bcf, #ff3b3b);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rush-rainbow 3s linear infinite;
+}

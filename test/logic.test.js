@@ -46,18 +46,18 @@ test('先示唆の当選率：当たり ÷ (当たり＋外れの先示唆) が�
   assert.deepEqual(logic.FLASH_OPTIONS, ['45', '25', '100']);
 });
 
-test('バトル：勝ちは1500か1000でラッシュ、負けは1000', () => {
+test('バトル：勝ちは1500か1000でRUSH、負けは1000', () => {
   assert.deepEqual(withMockRandom([0.1, 0.2], () => logic.rollBattle()), { win: true, balls: 1500 });
   assert.deepEqual(withMockRandom([0.1, 0.7], () => logic.rollBattle()), { win: true, balls: 1000 });
   assert.deepEqual(withMockRandom([0.6], () => logic.rollBattle()), { win: false, balls: 1000 });
 });
 
-test('ラッシュ：ST130回で継続率75%（1回転 約1/94.3）', () => {
+test('RUSH：ST130回で継続率75%（1回転 約1/94.3）', () => {
   assert.ok(close(1 / logic.P_RUSH_HIT, 94.3, 0.1));
   assert.ok(close(1 - Math.pow(1 - logic.P_RUSH_HIT, 130), 0.75, 1e-12));
 });
 
-test('ラッシュの当たり：45%で6000か7500、55%で1500', () => {
+test('RUSHの当たり：45%で6000か7500、55%で1500', () => {
   assert.deepEqual(withMockRandom([0.1, 0.2], () => logic.rollRushBonus()), { big: true, balls: 6000 });
   assert.deepEqual(withMockRandom([0.1, 0.8], () => logic.rollRushBonus()), { big: true, balls: 7500 });
   assert.deepEqual(withMockRandom([0.5], () => logic.rollRushBonus()), { big: false, balls: 1500 });
@@ -71,11 +71,11 @@ test('CZ：40回で約18.3%、振り分けの合計は100%', () => {
   assert.deepEqual(withMockRandom([0.99], () => logic.rollCzBonus()), { balls: 300, to: 'cz', pct: 11.4 });
 });
 
-test('初当たりのラッシュ突入率は 約41%（チャージはCZに入らない）', () => {
+test('初当たりのRUSH突入率は 約41%（チャージはCZに入らない）', () => {
   assert.ok(close(logic.rushEntryProbability(), 0.414, 0.003));
 });
 
-test('シミュレーションでもラッシュ突入率が理論値に近い', () => {
+test('シミュレーションでもRUSH突入率が理論値に近い', () => {
   let rush = 0;
   const N = 40000;
   for (let i = 0; i < N; i++) {

@@ -58,7 +58,7 @@ function rollNormalHitType() {
 }
 
 // ---- バトル（図柄揃い後） ----
-// 勝利 50%：ラッシュへ（1500 or 1000個・半々）／ 敗北：1000個 → CZ
+// 勝利 50%：RUSHへ（1500 or 1000個・半々）／ 敗北：1000個 → CZ
 const BATTLE_WIN = 0.5;
 const CHARGE_BALLS = 300;
 const BATTLE_LOSE_BALLS = 1000;
@@ -71,7 +71,7 @@ function rollBattle() {
   return { win: false, balls: BATTLE_LOSE_BALLS };
 }
 
-// ---- ラッシュ（ST130回・継続率75%） ----
+// ---- RUSH（ST130回・継続率75%） ----
 const RUSH_ST = 130;
 const RUSH_CONTINUE = 0.75;
 // 130回のうちに当たる確率が75%になる1回転あたりの確率（約1/94.3）
@@ -81,7 +81,7 @@ function spinRush() {
   return Math.random() < P_RUSH_HIT ? 'hit' : 'miss';
 }
 
-// ラッシュ中の当たり：45%で 6000 or 7500個（半々）、55%で1500個
+// RUSH中の当たり：45%で 6000 or 7500個（半々）、55%で1500個
 const RUSH_BIG_SHARE = 0.45;
 
 function rollRushBonus() {
@@ -99,7 +99,7 @@ function spinCz() {
   return Math.random() < P_CZ_HIT ? 'hit' : 'miss';
 }
 
-// CZ当選時の振り分け（％）。to: 'rush' ならラッシュ、'cz' ならCZ（40回）にもう一度
+// CZ当選時の振り分け（％）。to: 'rush' ならRUSH、'cz' ならCZ（40回）にもう一度
 const CZ_HIT_TABLE = [
   { balls: 9000, to: 'rush', pct: 14.2 },
   { balls: 9000, to: 'cz', pct: 28.8 },
@@ -125,14 +125,14 @@ function czHitProbability() {
   return 1 - Math.pow(1 - P_CZ_HIT, CZ_SPINS);
 }
 
-// CZに入ったあと、最終的にラッシュへ行ける確率（CZ→CZのループ込み）
+// CZに入ったあと、最終的にRUSHへ行ける確率（CZ→CZのループ込み）
 function czToRushProbability() {
   const q = czHitProbability();
   const toRush = CZ_HIT_TABLE.filter((r) => r.to === 'rush').reduce((s, r) => s + r.pct, 0) / 100;
   return (q * toRush) / (1 - q * (1 - toRush));
 }
 
-// 初当たり1回がラッシュに入る確率（バトル勝利＋バトル敗北後のCZ経由）。チャージはCZに入らず通常へ
+// 初当たり1回がRUSHに入る確率（バトル勝利＋バトル敗北後のCZ経由）。チャージはCZに入らず通常へ
 function rushEntryProbability() {
   const zugaraShare = P_ZUGARA / P_TOTAL_HIT;
   const direct = zugaraShare * BATTLE_WIN;
@@ -140,7 +140,7 @@ function rushEntryProbability() {
   return direct + toCz * czToRushProbability();
 }
 
-// 初当たり1回がラッシュに入らずに終わる確率
+// 初当たり1回がRUSHに入らずに終わる確率
 const P_NO_RUSH_FROM_HIT = 1 - rushEntryProbability();
 
 // 初当たりまでの回転数の確率

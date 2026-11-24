@@ -2,10 +2,10 @@
 
 // 牙13 シミュレーター（画面と状態遷移）。確率は logic.js。
 // 流れ：通常時 →（先示唆）→ 大当たり
-//   ├ 図柄揃い → バトル → 勝利：ラッシュ（1500 or 1000個）／ 敗北：1000個 → CZ
+//   ├ 図柄揃い → バトル → 勝利：RUSH（1500 or 1000個）／ 敗北：1000個 → CZ
 //   └ チャージ（300個）→ そのまま通常へ（CZには入らない）
-// ラッシュ：ST130回。当たれば継続（45%で6000 or 7500個、55%で1500個）、130回スルーでCZへ
-// CZ：40回転（電サポなし）1/199。当たれば振り分けでラッシュかCZ再突入、外せば通常へ
+// RUSH：ST130回。当たれば継続（45%で6000 or 7500個、55%で1500個）、130回スルーでCZへ
+// CZ：40回転（電サポなし）1/199。当たれば振り分けでRUSHかCZ再突入、外せば通常へ
 
 const game = {
   state: 'normal_idle',
@@ -21,8 +21,8 @@ const game = {
   normalHitCount: 0,
   rushEntryCount: 0,
   czHitCount: 0,
-  noRushStreak: 0,   // 初当たりでラッシュに入れなかった連続回数
-  lastRushSpins: 0,  // 最後に初当たりからラッシュに入ったときの通常時回転数
+  noRushStreak: 0,   // 初当たりでRUSHに入れなかった連続回数
+  lastRushSpins: 0,  // 最後に初当たりからRUSHに入ったときの通常時回転数
   rushAllStats: { totalSpins: 0, hits: 0, big: 0, ends: 0 },
   session: null, // 初当たりから通常に戻るまで { hits, nominalBalls, actualBalls, everRush }
   stRemaining: 0,
@@ -32,7 +32,7 @@ const game = {
   detailsExpanded: false,
   shareOpen: false, // 「当たったときの振り分け」タブを開いているか（開閉は覚えておく）
   lastRankResult: null,
-  hitHistory: [], // [{games, chain}]（新しい順。chain=null は結果待ち、0はラッシュなし）
+  hitHistory: [], // [{games, chain}]（新しい順。chain=null は結果待ち、0はRUSHなし）
   slump: [{ x: 0, y: 0 }],
   log: [],
 };
@@ -197,7 +197,7 @@ function startSession(interval) {
   game.session = { hits: 1, nominalBalls: 0, actualBalls: 0, everRush: false };
 }
 
-// チャージはCZに入らず単発で終わる：履歴を確定して、ラッシュ非突入の連続を数える
+// チャージはCZに入らず単発で終わる：履歴を確定して、RUSH非突入の連続を数える
 function finishSingle() {
   const last = game.hitHistory[0];
   if (last && last.chain === null) last.chain = 0;
@@ -231,7 +231,7 @@ function handleBattlePush() {
   const b = game.pending.battle;
   const actual = award(b.balls);
   if (b.win) {
-    addLog(`バトル勝利！ ＋${actual}球 ラッシュ突入`, 'rush');
+    addLog(`バトル勝利！ ＋${actual}球 RUSH突入`, 'rush');
     setState('battle_win');
   } else {
     addLog(`バトル敗北 ＋${actual}球`);
@@ -239,7 +239,7 @@ function handleBattlePush() {
   }
 }
 
-// ---- ラッシュ（ST130回） ----
+// ---- RUSH（ST130回） ----
 
 function enterRush() {
   if (!game.session.everRush) {
@@ -272,7 +272,7 @@ function runRushSpin(opts = {}) {
   }
   if (game.stRemaining <= 0) {
     game.rushAllStats.ends++;
-    addLog(`ラッシュ終了（${game.session.hits}連）`);
+    addLog(`RUSH終了（${game.session.hits}連）`);
     setState('rush_end');
     return true;
   }
@@ -588,7 +588,7 @@ function renderHeader() {
 function renderModeBadge() {
   const el = document.getElementById('mode-badge');
   if (game.mode === 'rush') {
-    el.textContent = 'ラッシュ中';
+    el.textContent = 'RUSH中';
     el.className = 'rush';
   } else if (game.mode === 'cz') {
     el.textContent = 'CZ中';
@@ -660,14 +660,14 @@ function hitIntervalProbHtml(n) {
   return '';
 }
 
-// 初当たりでラッシュに入れなかった連続（5回連続目から）
+// 初当たりでRUSHに入れなかった連続（5回連続目から）
 const NO_RUSH_STREAK_NOTICE_MIN = 5;
 function noRushStreakNoticeHtml() {
   const n = game.noRushStreak;
   if (n < NO_RUSH_STREAK_NOTICE_MIN) return '';
   const p = Math.pow(P_NO_RUSH_FROM_HIT, n);
   const hamari = game.normalSpins - game.lastRushSpins;
-  return rareNote(`ラッシュ非突入　${n}回連続中<br>発生率 ${pctText(p)}%${rareText(p)}<br>前回のラッシュ突入から ${hamari.toLocaleString()}回転ハマり`);
+  return rareNote(`RUSH非突入　${n}回連続中<br>発生率 ${pctText(p)}%${rareText(p)}<br>前回のRUSH突入から ${hamari.toLocaleString()}回転ハマり`);
 }
 
 const P_NORMAL_HIT_DISPLAY = '合算 1/349.99（図柄揃い 1/437.48・チャージ 1/1749.97）';
@@ -677,7 +677,7 @@ const RUSH_ENTRY_THEORY = `理論 約${Math.round(rushEntryProbability() * 100)}
 
 function rushIdleScreen() {
   return `<div class="screen">
-    <p class="yodel-label">ラッシュ</p>
+    <p class="yodel-label rush-rainbow-label">RUSH</p>
     <p class="chain-label">${game.session.hits}連チャン中</p>
     <p class="rush-sub">獲得出玉 <span>${game.session.nominalBalls.toLocaleString()}</span> 個</p>
     <p class="rush-spins">ST残り ${game.stRemaining}回</p>
@@ -712,18 +712,18 @@ function czIdleScreen() {
 function shareNote(text) {
   return `<p class="share-note">振り分け ${text}</p>`;
 }
-// 通常時の図柄揃い：1000 or 1500個＋ラッシュ 50%（半々）、1000個＋CZ 50%
+// 通常時の図柄揃い：1000 or 1500個＋RUSH 50%（半々）、1000個＋CZ 50%
 function battleShareHtml(b) {
   if (!b.win) return shareNote('1000個＋CZ 50%');
-  return shareNote(`${b.balls}個＋ラッシュ 25%<br><small>（1000 or 1500個＋ラッシュ 50%）</small>`);
+  return shareNote(`${b.balls}個＋RUSH 25%<br><small>（1000 or 1500個＋RUSH 50%）</small>`);
 }
-// ラッシュ：6000 or 7500個 45%（半々）、1500個 55%
+// RUSH：6000 or 7500個 45%（半々）、1500個 55%
 function rushShareHtml(b) {
   if (!b.big) return shareNote('1500個 55%');
   return shareNote(`${b.balls.toLocaleString()}個 22.5%<br><small>（6000 or 7500個 45%）</small>`);
 }
 function czShareHtml(b) {
-  return shareNote(`${b.balls.toLocaleString()}個＋${b.to === 'rush' ? 'ラッシュ' : 'CZ'} ${b.pct}%`);
+  return shareNote(`${b.balls.toLocaleString()}個＋${b.to === 'rush' ? 'RUSH' : 'CZ'} ${b.pct}%`);
 }
 const CHARGE_SHARE_HTML = shareNote(`チャージ 1/1749.97<br><small>（当たり全体の約${Math.round(P_CHARGE / P_TOTAL_HIT * 100)}%）</small>`);
 
@@ -731,17 +731,17 @@ const CHARGE_SHARE_HTML = shareNote(`チャージ 1/1749.97<br><small>（当た�
 const SHARE_TABLES = {
   battle: {
     title: 'バトルの結果',
-    rows: [['1500個＋ラッシュ', '25%'], ['1000個＋ラッシュ', '25%'], ['1000個＋CZ', '50%']],
-    note: '1500 or 1000個＋ラッシュ 50%（半々）',
+    rows: [['1500個＋RUSH', '25%'], ['1000個＋RUSH', '25%'], ['1000個＋CZ', '50%']],
+    note: '1500 or 1000個＋RUSH 50%（半々）',
   },
   rush: {
-    title: 'ラッシュ中の当たり',
+    title: 'RUSH中の当たり',
     rows: [['7500個（10R×5）', '22.5%'], ['6000個（10R×4）', '22.5%'], ['1500個', '55%']],
-    note: '6000 or 7500個 45%（半々）。どれもラッシュ継続',
+    note: '6000 or 7500個 45%（半々）。どれもRUSH継続',
   },
   cz: {
     title: 'CZ中の当たり',
-    rows: CZ_HIT_TABLE.map((r) => [`${r.balls.toLocaleString()}個＋${r.to === 'rush' ? 'ラッシュ' : 'CZ'}`, `${r.pct}%`]),
+    rows: CZ_HIT_TABLE.map((r) => [`${r.balls.toLocaleString()}個＋${r.to === 'rush' ? 'RUSH' : 'CZ'}`, `${r.pct}%`]),
     note: '',
   },
 };
@@ -773,10 +773,15 @@ function roundsText(nominal) {
 
 // 「1500ボーナス！」と大きく出し、下に小さく（実質獲得 1,400）。通常時の300個（2R）は「チャージ！」（CZ中は charge=false で「300ボーナス！」）。
 // label はその上に小さく出す見出し（任意）
+// 6000個以上のボーナスは数字だけレインボー
+function bonusNumHtml(nominal) {
+  return nominal >= 6000 ? `<span class="rainbow-num">${nominal}</span>` : `${nominal}`;
+}
+
 function bonusBox(label, nominal, cls = 'standard', sub = '', charge = true) {
   return `<div class="vibun-box rush-box">
     ${label ? `<p class="bonus-label">${label}</p>` : ''}
-    <p class="bonus-main ${cls}">${charge && nominal === CHARGE_BALLS ? 'チャージ！' : `${nominal}ボーナス！`}</p>
+    <p class="bonus-main ${cls}">${charge && nominal === CHARGE_BALLS ? 'チャージ！' : `${bonusNumHtml(nominal)}ボーナス！`}</p>
     <p class="bonus-sub">（実質獲得 ${toActualBalls(nominal).toLocaleString()}）</p>
     ${sub}
   </div>`;
@@ -838,7 +843,7 @@ function buildScreen(state) {
         <p class="result-sub">${p.interval}回転で大当たり</p>
         <div class="vibun-box rush-box">
           <p class="bonus-main standard">図柄揃い！</p>
-          <p class="judge-label">勝てばラッシュ</p>
+          <p class="judge-label">勝てばRUSH</p>
         </div>
         ${hitIntervalProbHtml(p.interval)}
         <button class="btn-action" onclick="handleBattle()">▶ バトルへ</button>
@@ -848,7 +853,7 @@ function buildScreen(state) {
     case 'battle':
       return `<div class="screen">
         <p class="gasha-title">バトル</p>
-        <p class="prob-hint">勝率 50%<br>勝てばラッシュ ／ 負ければ1000個＋CZ</p>
+        <p class="prob-hint">勝率 50%<br>勝てばRUSH ／ 負ければ1000個＋CZ</p>
         <button class="gasha-button" onclick="handleBattlePush()">PUSH</button>
         ${shareTabHtml('battle')}
       </div>`;
@@ -856,9 +861,9 @@ function buildScreen(state) {
     case 'battle_win':
       return `<div class="screen">
         <p class="judge-win">勝利！</p>
-        ${bonusBox('ラッシュ突入', p.battle.balls, 'premium')}
+        ${bonusBox('RUSH突入', p.battle.balls, 'premium')}
         ${battleShareHtml(p.battle)}
-        <button class="btn-action" onclick="enterRush()">▶ ラッシュへ</button>
+        <button class="btn-action" onclick="enterRush()">▶ RUSHへ</button>
       </div>`;
 
     case 'battle_lose':
@@ -896,7 +901,7 @@ function buildScreen(state) {
 
     case 'rush_end':
       return `<div class="screen">
-        <p class="result-main lose small">ラッシュ終了</p>
+        <p class="result-main lose small">RUSH終了</p>
         <p class="result-sub">${game.session.hits}連 ／ ${game.session.nominalBalls.toLocaleString()}個</p>
         <p class="result-sub">CZ（${CZ_SPINS}回転）へ</p>
         <button class="btn-sub" onclick="enterCz()" style="margin-top:8px;">▶ CZへ</button>
@@ -908,13 +913,13 @@ function buildScreen(state) {
     case 'cz_hit': {
       const b = p.bonus;
       const toRush = b.to === 'rush';
-      const sub = roundsText(b.balls) + `<p class="judge-label">${toRush ? 'ラッシュへ！' : 'CZ継続'}</p>`;
+      const sub = roundsText(b.balls) + `<p class="judge-label">${toRush ? 'RUSHへ！' : 'CZ継続'}</p>`;
       return `<div class="screen">
         <p class="judge-win">CZ当選！</p>
         <p class="result-sub">${p.spins}回転目 ／ ${game.session.hits}連チャン</p>
         ${bonusBox('', b.balls, b.balls >= 9000 || toRush ? 'premium' : 'standard', sub, false)}
         ${czShareHtml(b)}
-        <button class="btn-action" onclick="handleCzHitContinue()">▶ ${toRush ? 'ラッシュへ' : 'CZへ'}</button>
+        <button class="btn-action" onclick="handleCzHitContinue()">▶ ${toRush ? 'RUSHへ' : 'CZへ'}</button>
       </div>`;
     }
 
@@ -1003,7 +1008,7 @@ function buildScreen(state) {
             <span class="rr-val">${game.normalHitCount}回</span>
           </div>
           <div class="result-row">
-            <span class="rr-label">ラッシュ突入</span>
+            <span class="rr-label">RUSH突入</span>
             <span class="rr-val">${game.rushEntryCount}回</span>
           </div>
         </div>
